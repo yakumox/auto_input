@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto Input - 設定</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="layout">
+    <!-- サイドバー: プロファイル管理 -->
+    <aside class="sidebar">
+      <h2 class="sidebar-title">プロファイル</h2>
+      <ul id="profileList" class="profile-list"></ul>
+      <div class="sidebar-actions">
+        <button id="btnNewProfile" class="btn btn-add">＋ 新規作成</button>
+      </div>
+    </aside>
+
+    <!-- メイン: 設定内容 -->
+    <main class="main">
+      <div id="noProfileSelected" class="empty-state">
+        <p>👈 左のプロファイルを選択してください</p>
+      </div>
+
+      <div id="profileEditor" class="profile-editor hidden">
+        <div class="editor-header">
+          <div class="profile-name-row">
+            <input type="text" id="profileName" class="profile-name-input" placeholder="プロファイル名">
+            <button id="btnDeleteProfile" class="btn btn-danger btn-sm">削除</button>
+          </div>
+        </div>
+
+        <div class="fields-section">
+          <div class="fields-header">
+            <h3>入力フィールド設定</h3>
+            <button id="btnAddField" class="btn btn-add btn-sm">＋ フィールド追加</button>
+          </div>
+          <div class="fields-info">
+            <p class="hint">
+              セレクタ: CSS セレクタ (例: <code>#email</code>, <code>input[name="username"]</code>)<br>
+              タイプ: フィールドの種類を選択<br>
+              値: 入力する値 / <strong>radio</strong> → 選択するラジオの <code>value</code> 属性 /
+              <strong>checkbox</strong> → <code>true</code> または <code>false</code> /
+              <strong>select</strong> → option の value または表示テキスト
+            </p>
+          </div>
+          <div id="fieldsList" class="fields-list">
+            <!-- フィールドが動的に追加される -->
+          </div>
+          <div id="emptyFields" class="empty-fields">
+            <p>フィールドがありません。「フィールド追加」ボタンで追加してください。</p>
+          </div>
+        </div>
+
+        <div class="editor-footer">
+          <button id="btnSave" class="btn btn-primary">💾 保存</button>
+          <span id="saveStatus" class="save-status"></span>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 新規プロファイル作成ダイアログ -->
+  <div id="newProfileDialog" class="dialog-overlay hidden">
+    <div class="dialog">
+      <h3>新規プロファイル作成</h3>
+      <input type="text" id="newProfileName" class="dialog-input" placeholder="プロファイル名を入力">
+      <div class="dialog-buttons">
+        <button id="btnCreateProfile" class="btn btn-primary">作成</button>
+        <button id="btnCancelCreate" class="btn btn-cancel">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 削除確認ダイアログ -->
+  <div id="deleteDialog" class="dialog-overlay hidden">
+    <div class="dialog">
+      <h3>プロファイルを削除</h3>
+      <p id="deleteDialogMsg">このプロファイルを削除しますか？</p>
+      <div class="dialog-buttons">
+        <button id="btnConfirmDelete" class="btn btn-danger">削除</button>
+        <button id="btnCancelDelete" class="btn btn-cancel">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Meiryo, sans-serif;
+  font-size: 14px;
+  background-color: #f5f7fa;
+  color: #333;
+  min-width: 240px;
+}
+
+.container {
+  padding: 16px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #4A90D9;
+  margin-bottom: 14px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.profile-section {
+  margin-bottom: 14px;
+}
+
+.label {
+  display: block;
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.select {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #c8d0d9;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.select:focus {
+  border-color: #4A90D9;
+  box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.2);
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.btn {
+  flex: 1;
+  padding: 9px 6px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btn-icon {
+  font-size: 13px;
+}
+
+.btn-primary {
+  background-color: #4A90D9;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: #3a7fc8;
+}
+
+.btn-secondary {
+  background-color: #5cb85c;
+  color: #fff;
+}
+
+.btn-secondary:hover {
+  background-color: #4cae4c;
+}
+
+.btn-tertiary {
+  background-color: #f0f0f0;
+  color: #555;
+  border: 1px solid #d0d0d0;
+}
+
+.btn-tertiary:hover {
+  background-color: #e0e0e0;
+}
+
+/* ============ 新規プロファイル作成フォーム ============ */
+.new-profile-form {
+  margin-bottom: 12px;
+  background: #eef4fb;
+  border: 1px solid #b8d0ed;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.new-profile-form.hidden {
+  display: none;
+}
+
+.new-profile-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #b0c8e8;
+  border-radius: 5px;
+  font-size: 13px;
+  margin-bottom: 6px;
+  outline: none;
+}
+
+.new-profile-input:focus {
+  border-color: #4A90D9;
+  box-shadow: 0 0 0 2px rgba(74,144,217,0.2);
+}
+
+.new-profile-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.btn-xs {
+  padding: 4px 12px;
+  font-size: 11px;
+  flex: 0 0 auto; /* .btn の flex:1 を上書き */
+}
+
+.btn-cancel {
+  background-color: #bbb;
+  color: #fff;
+}
+.btn-cancel:hover {
+  background-color: #aaa;
+}
+
+.status-message {
+  min-height: 20px;
+  font-size: 12px;
+  text-align: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: opacity 0.3s;
+}
+
+.status-message.success {
+  color: #2d7a2d;
+  background-color: #e6f4e6;
+}
+
+.status-message.error {
+  color: #a94442;
+  background-color: #f9e6e5;
+}
+
+.status-message.info {
+  color: #31708f;
+  background-color: #d9edf7;
+}

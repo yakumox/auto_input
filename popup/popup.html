@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto Input</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">Auto Input</h1>
+
+    <div class="profile-section">
+      <label for="profileSelect" class="label">プロファイル</label>
+      <select id="profileSelect" class="select">
+        <option value="">-- プロファイルなし --</option>
+      </select>
+    </div>
+
+    <div id="newProfileForm" class="new-profile-form hidden">
+      <input type="text" id="newProfileNameInput" class="new-profile-input" placeholder="プロファイル名">
+      <div class="new-profile-actions">
+        <button id="btnConfirmNew" class="btn btn-primary btn-xs">作成</button>
+        <button id="btnCancelNew" class="btn btn-cancel btn-xs">キャンセル</button>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button id="btnInput" class="btn btn-primary">
+        <span class="btn-icon">▶</span>入力
+      </button>
+      <button id="btnMemorize" class="btn btn-secondary">
+        <span class="btn-icon">💾</span>記憶
+      </button>
+      <button id="btnSettings" class="btn btn-tertiary">
+        <span class="btn-icon">⚙</span>設定
+      </button>
+    </div>
+
+    <div id="statusMessage" class="status-message"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
