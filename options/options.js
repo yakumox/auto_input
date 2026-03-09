@@ -110,7 +110,10 @@ function renderFields(fields) {
     fieldsList.appendChild(header);
   }
 
-  fields.forEach((field, index) => {
+  // passwordタイプは保持しない仕様のため描画対象から除外する
+  const safeFields = fields.filter(f => (f.type || 'text') !== 'password');
+
+  safeFields.forEach((field, index) => {
     fieldsList.appendChild(createFieldRow(field, index));
     updateRowTypeStyle(fieldsList.lastElementChild, field.type || 'text');
   });
@@ -126,11 +129,10 @@ function createFieldRow(field, index) {
   row.dataset.index = index;
   row.dataset.type = fieldType;
 
-  // タイプ選択肢
+  // タイプ選択肢（password は保持しない仕様のため除外）
   const typeOptions = [
     { value: 'text',     label: 'text' },
     { value: 'email',    label: 'email' },
-    { value: 'password', label: 'password' },
     { value: 'tel',      label: 'tel' },
     { value: 'number',   label: 'number' },
     { value: 'date',     label: 'date' },
@@ -250,7 +252,8 @@ btnSave.addEventListener('click', async () => {
     const type     = row.querySelector('.field-type-select')?.value || 'text';
     const selector = row.querySelector('.field-selector-input').value.trim();
     const value    = row.querySelector('.field-value-input').value;
-    if (selector) {
+    // passwordタイプは保持しない仕様のため保存対象から除外する
+    if (selector && type !== 'password') {
       fields.push({ label, type, selector, value });
     }
   });
@@ -354,6 +357,7 @@ function escHtml(str) {
   return str
     .replace(/&/g, '&amp;')
     .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')   // シングルクォートもエスケープ（XSS対策）
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 }

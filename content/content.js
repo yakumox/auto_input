@@ -2,6 +2,9 @@
 // Auto Input - コンテントスクリプト
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // 送信元が拡張機能自身でない場合は無視する（第三者からのメッセージを拒否）
+  if (sender.id !== chrome.runtime.id) return;
+
   if (message.action === 'applyInputs') {
     // 入力前にページの全フォームをクリア
     clearAllInputs();
@@ -76,9 +79,16 @@ function clearAllInputs() {
 // フィールドへの入力を適用する
 // ============================================================
 function applyInputs(fields) {
+  // 入力値の基本検証（配列でない場合は安全に終了）
+  if (!Array.isArray(fields)) return 0;
+
   let count = 0;
 
   fields.forEach(field => {
+    // field オブジェクトの型チェック
+    if (!field || typeof field !== 'object') return;
+    if (typeof field.selector !== 'string') return;
+    if (field.value !== undefined && typeof field.value !== 'string' && typeof field.value !== 'boolean') return;
     if (!field.selector) return;
 
     let elements = [];
@@ -93,6 +103,9 @@ function applyInputs(fields) {
     elements.forEach(el => {
       const tagName = el.tagName.toLowerCase();
       const elType  = (el.type || '').toLowerCase();
+
+      // passwordフィールドへの書き込みは行わない（保持しない仕様のため）
+      if (elType === 'password') return;
 
       try {
         if (tagName === 'select') {
@@ -168,6 +181,7 @@ function collectInputs() {
     if (type === 'submit' || type === 'button' || type === 'reset' || type === 'image') return;
     if (type === 'hidden') return;
     if (type === 'file') return; // セキュリティ制限によりJS経由での値取得・設定が不可
+    if (type === 'password') return; // パスワードを平文でストレージに保存しない（セキュリティ対策）
     // radio/checkbox はカスタムCSSで display:none にされることが多いため offsetParent チェックを除外
     if (type !== 'radio' && type !== 'checkbox' && el.offsetParent === null) return;
 
