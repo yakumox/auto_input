@@ -106,6 +106,14 @@ btnInput.addEventListener('click', async () => {
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab || !tab.id) {
+      showStatus('このページでは実行できません', 'error');
+      return;
+    }
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ["content/content.js"]
+    });
     const response = await chrome.tabs.sendMessage(tab.id, {
       action: 'applyInputs',
       fields: profile.fields
@@ -130,6 +138,10 @@ btnMemorize.addEventListener('click', async () => {
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab || !tab.id) {
+      showStatus('このページでは実行できません', 'error');
+      return;
+    }
     const response = await chrome.tabs.sendMessage(tab.id, { action: 'collectInputs' });
 
     if (!response || !response.success) {

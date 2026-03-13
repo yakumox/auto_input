@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Auto Input",
+  "name": "Auto Input – 開発者向けWebフォーム自動入力ツール",
   "version": "1.0.0",
-  "description": "フォームに自動入力するChrome拡張機能",
+  "description": "保存した入力プロファイルを使ってWebフォームを自動入力できる、開発・テスト向けのシンプルなツールです。",
   "permissions": [
     "activeTab",
     "storage",
@@ -21,11 +21,5 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "options_page": "options/options.html",
-  "content_scripts": [
-    {
-      "matches": ["https://*/*", "http://*/*"],
-      "js": ["content/content.js"]
-    }
-  ]
+  "options_page": "options/options.html"
 }
