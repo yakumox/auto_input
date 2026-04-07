@@ -39,10 +39,15 @@ function clearAllInputs() {
 
     try {
       if (tagName === 'select') {
-        // select: 先頭オプションに戻す（空値があれば空値、なければ index 0）
-        el.value = '';
-        if (el.value === '' && el.options.length > 0 && el.options[0].value !== '') {
-          el.selectedIndex = 0;
+        if (el.multiple) {
+          // select[multiple]: 全オプションの選択を解除する
+          Array.from(el.options).forEach(o => { o.selected = false; });
+        } else {
+          // select（単一）: 先頭オプションに戻す（空値があれば空値、なければ index 0）
+          el.value = '';
+          if (el.value === '' && el.options.length > 0 && el.options[0].value !== '') {
+            el.selectedIndex = 0;
+          }
         }
         el.dispatchEvent(new Event('change', { bubbles: true }));
 
@@ -115,14 +120,33 @@ function applyInputs(fields) {
       try {
         if (tagName === 'select') {
           // ---- select ----
-          const options = Array.from(el.options);
-          const match = options.find(
-            o => o.value === field.value || o.text.trim() === field.value
-          );
-          if (match) {
-            el.value = match.value;
+          if (el.multiple) {
+            // select[multiple]: JSON 配列文字列をパースして複数選択を適用する
+            let values = [];
+            try {
+              const parsed = JSON.parse(field.value);
+              if (Array.isArray(parsed)) values = parsed;
+            } catch (_) {
+              // JSON でない場合は単一値として扱う
+              if (field.value) values = [field.value];
+            }
+            // 全オプションの selected を一旦リセットしてから対象を選択
+            Array.from(el.options).forEach(o => {
+              o.selected = values.includes(o.value);
+            });
             el.dispatchEvent(new Event('change', { bubbles: true }));
             count++;
+          } else {
+            // select（単一）: value またはテキストで一致するオプションを選択
+            const options = Array.from(el.options);
+            const match = options.find(
+              o => o.value === field.value || o.text.trim() === field.value
+            );
+            if (match) {
+              el.value = match.value;
+              el.dispatchEvent(new Event('change', { bubbles: true }));
+              count++;
+            }
           }
 
         } else if (elType === 'radio') {
@@ -218,12 +242,29 @@ function collectInputs() {
 
     } else {
       // ---- その他の要素 ----
-      selector = generateSelector(el);
+
+      // checkbox かつ name がある場合は value 属性も含めた一意セレクタを生成する
+      // （同一 name の複数 checkbox を個別に識別するため）
+      if (type === 'checkbox' && el.name && !el.id) {
+        const escapedName  = el.name.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        const escapedValue = (el.value || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        selector = `input[type="checkbox"][name="${escapedName}"][value="${escapedValue}"]`;
+      } else {
+        selector = generateSelector(el);
+      }
+
       if (!selector || seenSelectors.has(selector)) return;
       seenSelectors.add(selector);
 
       if (tagName === 'select') {
-        value = el.value;
+        if (el.multiple) {
+          // select[multiple]: 選択中の全 value を JSON 配列文字列で保持する
+          value = JSON.stringify(
+            Array.from(el.selectedOptions).map(o => o.value)
+          );
+        } else {
+          value = el.value;
+        }
       } else if (type === 'checkbox') {
         value = el.checked ? 'true' : 'false';
       } else {

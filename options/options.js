@@ -260,8 +260,13 @@ btnSave.addEventListener('click', async () => {
   profile.fields = fields;
 
   // ストレージに保存
-  await chrome.storage.local.set({ profiles });
-  showSaveStatus('保存しました ✓', 'success');
+  try {
+    await chrome.storage.local.set({ profiles });
+    showSaveStatus('保存しました ✓', 'success');
+  } catch (e) {
+    console.error('[Auto Input] Storage error', e);
+    showSaveStatus('保存に失敗しました', 'error');
+  }
 
   // サイドバーを再描画（名前変更に対応）
   renderProfileList();
