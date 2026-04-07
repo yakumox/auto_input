@@ -87,6 +87,23 @@ btnCancelNew.addEventListener('click', () => {
   profileSelect.value = lastSelectedProfileId;
 });
 
+// content.js をアクティブタブへ動的注入するヘルパー
+async function injectContentScript(tab) {
+  if (!tab?.id) return false;
+  // chrome://, about:, edge:// 等の内部ページは注入不可
+  const url = tab.url || '';
+  if (!url.startsWith('http://') && !url.startsWith('https://')) return false;
+  try {
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ['content/content.js']
+    });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 // 「入力」ボタン
 btnInput.addEventListener('click', async () => {
   const profileId = profileSelect.value;
@@ -106,6 +123,9 @@ btnInput.addEventListener('click', async () => {
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const ok = await injectContentScript(tab);
+    if (!ok) { showStatus('このページには対応していません', 'error'); return; }
+
     const response = await chrome.tabs.sendMessage(tab.id, {
       action: 'applyInputs',
       fields: profile.fields
@@ -116,7 +136,7 @@ btnInput.addEventListener('click', async () => {
       showStatus('入力できませんでした', 'error');
     }
   } catch (e) {
-    showStatus('入力に失敗しました。ページを再読み込みしてください。', 'error');
+    showStatus('入力に失敗しました: ' + e.message, 'error');
   }
 });
 
@@ -130,6 +150,9 @@ btnMemorize.addEventListener('click', async () => {
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const ok = await injectContentScript(tab);
+    if (!ok) { showStatus('このページには対応していません', 'error'); return; }
+
     const response = await chrome.tabs.sendMessage(tab.id, { action: 'collectInputs' });
 
     if (!response || !response.success) {
@@ -151,7 +174,7 @@ btnMemorize.addEventListener('click', async () => {
       showStatus(`${fields.length}件の入力内容を記憶しました ✓`, 'success');
     }
   } catch (e) {
-    showStatus('記憶に失敗しました。ページを再読み込みしてください。', 'error');
+    showStatus('記憶に失敗しました: ' + e.message, 'error');
   }
 });
 

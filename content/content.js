@@ -1,22 +1,27 @@
 // content.js
 // Auto Input - コンテントスクリプト
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  // 送信元が拡張機能自身でない場合は無視する（第三者からのメッセージを拒否）
-  if (sender.id !== chrome.runtime.id) return;
+// 二重注入ガード: scripting.executeScript で複数回注入されてもリスナーを1回だけ登録する
+if (!window.__autoInputInitialized) {
+  window.__autoInputInitialized = true;
 
-  if (message.action === 'applyInputs') {
-    // 入力前にページの全フォームをクリア
-    clearAllInputs();
-    const count = applyInputs(message.fields);
-    sendResponse({ success: true, count });
-  } else if (message.action === 'collectInputs') {
-    // 現在の入力内容を収集（呼び出し元で profile.fields を全置換する）
-    const fields = collectInputs();
-    sendResponse({ success: true, fields });
-  }
-  return true;
-});
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    // 送信元が拡張機能自身でない場合は無視する（第三者からのメッセージを拒否）
+    if (sender.id !== chrome.runtime.id) return;
+
+    if (message.action === 'applyInputs') {
+      // 入力前にページの全フォームをクリア
+      clearAllInputs();
+      const count = applyInputs(message.fields);
+      sendResponse({ success: true, count });
+    } else if (message.action === 'collectInputs') {
+      // 現在の入力内容を収集（呼び出し元で profile.fields を全置換する）
+      const fields = collectInputs();
+      sendResponse({ success: true, fields });
+    }
+    return true;
+  });
+}
 
 // ============================================================
 // ページの全フォーム入力をクリアする
