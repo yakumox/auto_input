@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Auto Input",
   "version": "1.0.1",
-  "description": "フォームに自動入力するChrome拡張機",
+  "description": "保存した入力プロファイルを使ってWebフォームを自動入力できる、開発・テスト向けのシンプルなツールです。",
   "permissions": [
     "activeTab",
     "storage",
