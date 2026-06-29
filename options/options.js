@@ -25,6 +25,18 @@ const deleteDialogMsg   = document.getElementById('deleteDialogMsg');
 const btnConfirmDelete  = document.getElementById('btnConfirmDelete');
 const btnCancelDelete   = document.getElementById('btnCancelDelete');
 
+// エクスポート／インポート
+const btnExport         = document.getElementById('btnExport');
+const btnImport         = document.getElementById('btnImport');
+const importFileInput   = document.getElementById('importFileInput');
+
+// インポート確認ダイアログ
+const importDialog      = document.getElementById('importDialog');
+const importDialogMsg   = document.getElementById('importDialogMsg');
+const btnImportMerge    = document.getElementById('btnImportMerge');
+const btnImportReplace  = document.getElementById('btnImportReplace');
+const btnCancelImport   = document.getElementById('btnCancelImport');
+
 // --- 状態 ---
 let profiles = {};         // { id: { name, fields: [...] } }
 let currentProfileId = null;
@@ -365,6 +377,153 @@ function escHtml(str) {
     .replace(/'/g, '&#x27;')   // シングルクォートもエスケープ（XSS対策）
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+}
+
+// ============================================================
+// --- エクスポート ---
+// ============================================================
+btnExport.addEventListener('click', async () => {
+  const data = await chrome.storage.local.get('profiles');
+  const exportData = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    profiles: data.profiles || {}
+  };
+
+  const json = JSON.stringify(exportData, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const a = document.createElement('a');
+  a.href     = url;
+  a.download = `auto_input_profiles_${timestamp}.json`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+});
+
+// ============================================================
+// --- インポート ---
+// ============================================================
+
+// インポートボタン → ファイル選択ダイアログを開く
+btnImport.addEventListener('click', () => {
+  importFileInput.value = '';   // 同じファイルを再選択できるようリセット
+  importFileInput.click();
+});
+
+// ファイルが選択されたら読み込んでダイアログを表示
+importFileInput.addEventListener('change', () => {
+  const file = importFileInput.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    let parsed;
+    try {
+      parsed = JSON.parse(e.target.result);
+    } catch {
+      alert('JSONの解析に失敗しました。正しいエクスポートファイルを選択してください。');
+      return;
+    }
+
+    // バリデーション
+    if (!parsed || typeof parsed.profiles !== 'object' || parsed.profiles === null) {
+      alert('ファイルの形式が正しくありません（"profiles" キーが見つかりません）。');
+      return;
+    }
+
+    const importedProfiles = parsed.profiles;
+    const validEntries = Object.entries(importedProfiles).filter(([, p]) =>
+      p && typeof p.name === 'string' && Array.isArray(p.fields)
+    );
+
+    if (validEntries.length === 0) {
+      alert('インポートできるプロファイルが見つかりませんでした。');
+      return;
+    }
+
+    // 確認ダイアログを表示
+    importDialogMsg.textContent =
+      `${validEntries.length} 件のプロファイルが見つかりました。既存のプロファイルを保持したまま追加しますか？それとも既存を全て削除して置き換えますか？`;
+    importDialog.classList.remove('hidden');
+
+    // ダイアログのボタンに今回のデータを紐付け
+    importDialog._pendingProfiles = Object.fromEntries(validEntries);
+  };
+  reader.readAsText(file);
+});
+
+// インポート確認ダイアログ: 追加
+btnImportMerge.addEventListener('click', async () => {
+  const incoming = importDialog._pendingProfiles;
+  if (!incoming) return;
+
+  // ストレージから最新の既存データを取得してからマージ
+  // （メモリ上の profiles だけに頼ると、他の操作で更新されたデータが失われる可能性があるため）
+  const stored = await chrome.storage.local.get('profiles');
+  const base = stored.profiles || {};
+
+  // 既存データを優先してマージ:
+  //   - incoming を先に展開し、base を後から上書きすることで既存プロファイルは変更されない
+  //   - incoming にしか存在しないIDのプロファイルだけが新規追加される
+  const merged = Object.assign({}, incoming, base);
+
+  // メモリ上の profiles も更新
+  profiles = merged;
+
+  await chrome.storage.local.set({ profiles: merged });
+  importDialog.classList.add('hidden');
+  importDialog._pendingProfiles = null;
+
+  renderProfileList();
+  // 選択中プロファイルがまだ存在するなら表示を維持する
+  if (currentProfileId && profiles[currentProfileId]) {
+    selectProfile(currentProfileId);
+  }
+  showImportSuccess(Object.keys(incoming).length, '追加');
+});
+
+// インポート確認ダイアログ: 置き換え
+btnImportReplace.addEventListener('click', async () => {
+  const incoming = importDialog._pendingProfiles;
+  if (!incoming) return;
+
+  profiles = incoming;
+  currentProfileId = null;
+
+  await chrome.storage.local.set({ profiles });
+  importDialog.classList.add('hidden');
+  importDialog._pendingProfiles = null;
+
+  renderProfileList();
+  noProfileSelected.style.display = '';
+  profileEditor.classList.add('hidden');
+  showImportSuccess(Object.keys(incoming).length, '置き換え');
+});
+
+// インポート確認ダイアログ: キャンセル
+btnCancelImport.addEventListener('click', () => {
+  importDialog.classList.add('hidden');
+  importDialog._pendingProfiles = null;
+});
+
+importDialog.addEventListener('click', (e) => {
+  if (e.target === importDialog) {
+    importDialog.classList.add('hidden');
+    importDialog._pendingProfiles = null;
+  }
+});
+
+function showImportSuccess(count, mode) {
+  // サイドバー下部に一時メッセージを表示
+  const msg = document.createElement('p');
+  msg.className = 'io-status';
+  msg.textContent = `✓ ${count} 件を${mode}しました`;
+  const actions = document.querySelector('.sidebar-actions');
+  actions.appendChild(msg);
+  setTimeout(() => msg.remove(), 3000);
 }
 
 // --- 起動 ---

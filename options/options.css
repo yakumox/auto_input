@@ -72,6 +72,48 @@ body {
 .sidebar-actions {
   padding: 12px;
   border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* エクスポート／インポートボタン群 */
+.sidebar-io {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-io {
+  flex: 1;
+  padding: 6px 4px;
+  border: none;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: rgba(255,255,255,0.1);
+  color: #ecf0f1;
+  transition: background 0.15s;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.btn-io:hover {
+  background-color: rgba(255,255,255,0.2);
+}
+
+/* インポート成功メッセージ */
+.io-status {
+  font-size: 11px;
+  color: #2ecc71;
+  text-align: center;
+  padding: 4px 0;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ============ メイン ============ */
@@ -460,6 +502,16 @@ body {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
+}
+
+/* インポートダイアログ: ボタンを縦並びに */
+.dialog-buttons-col {
+  flex-direction: column;
+}
+
+.dialog-buttons-col .btn {
+  width: 100%;
+  text-align: center;
 }
 
 /* ============ スクロールバー ============ */

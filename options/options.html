@@ -14,6 +14,9 @@
       <ul id="profileList" class="profile-list"></ul>
       <div class="sidebar-actions">
         <button id="btnNewProfile" class="btn btn-add">＋ 新規作成</button>
+        <button id="btnExport" class="btn btn-io">📤 エクスポート</button>
+        <button id="btnImport" class="btn btn-io">📥 インポート</button>
+        <input type="file" id="importFileInput" accept=".json" style="display:none">
       </div>
     </aside>
 
@@ -81,6 +84,19 @@
       <div class="dialog-buttons">
         <button id="btnConfirmDelete" class="btn btn-danger">削除</button>
         <button id="btnCancelDelete" class="btn btn-cancel">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- インポート確認ダイアログ -->
+  <div id="importDialog" class="dialog-overlay hidden">
+    <div class="dialog">
+      <h3>プロファイルをインポート</h3>
+      <p id="importDialogMsg">インポートしたプロファイルをどのように適用しますか？</p>
+      <div class="dialog-buttons dialog-buttons-col">
+        <button id="btnImportMerge" class="btn btn-primary">追加（既存を保持）</button>
+        <button id="btnImportReplace" class="btn btn-danger">置き換え（既存を削除）</button>
+        <button id="btnCancelImport" class="btn btn-cancel">キャンセル</button>
       </div>
     </div>
   </div>
